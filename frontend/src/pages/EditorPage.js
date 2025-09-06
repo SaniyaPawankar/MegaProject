@@ -1,78 +1,60 @@
+// frontend/src/pages/EditorPage.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 
-export default function EditorPage() {
-  const [code, setCode] = useState("// Start coding...");
+const EditorPage = () => {
+  const [code, setCode] = useState("");
+  const [language, setLanguage] = useState("javascript");
+  const [filename, setFilename] = useState("example.js");
   const [files, setFiles] = useState([]);
-  const [filename, setFilename] = useState("");
-  const [language, setLanguage] = useState("javascript"); // default language
 
-  // Fetch saved files on load
+  // Save file to backend
+  const saveFile = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/code/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, language, filename }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("✅ File saved: " + filename);
+        fetchFiles(); // reload sidebar
+      } else {
+        alert("❌ Error: " + data.message);
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+    }
+  };
+
+  // Fetch saved files
+  const fetchFiles = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/code/files");
+      const data = await response.json();
+      setFiles(data);
+    } catch (err) {
+      console.error("Fetch files error:", err);
+    }
+  };
+
   useEffect(() => {
     fetchFiles();
   }, []);
 
-  const fetchFiles = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/files");
-      if (res.data.success) {
-        setFiles(res.data.files);
-      }
-    } catch (err) {
-      console.error("Error fetching files:", err);
-    }
-  };
-
-  const saveFile = async () => {
-    if (!filename) {
-      const userFilename = prompt("Enter a filename (e.g., test.js):");
-      if (!userFilename) return;
-      setFilename(userFilename);
-    }
-
-    try {
-      await axios.post("http://localhost:5000/save", {
-        filename: filename || "untitled.js",
-        content: code,
-        language, // send language too ✅
-      });
-      alert("File saved successfully!");
-      fetchFiles();
-    } catch (err) {
-      console.error("Error saving file:", err);
-      alert("❌ Failed to save file");
-    }
-  };
-
-  const loadFile = async (name) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/files/${name}`);
-      if (res.data.success) {
-        setCode(res.data.content);
-        setFilename(name);
-        setLanguage(res.data.language || "javascript"); // set saved language
-      }
-    } catch (err) {
-      console.error("Error loading file:", err);
-    }
-  };
-
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", height: "100vh" }}>
       {/* Sidebar */}
-      <div style={{ width: "200px", borderRight: "1px solid #ddd", padding: "10px" }}>
+      <div style={{ width: "25%", background: "#f5f5f5", padding: "10px" }}>
         <h3>📂 Saved Files</h3>
         {files.length === 0 ? (
           <p>No files saved yet</p>
         ) : (
           <ul>
-            {files.map((file, i) => (
-              <li
-                key={i}
-                onClick={() => loadFile(file)}
-                style={{ cursor: "pointer", marginBottom: "5px" }}
-              >
-                {file}
+            {files.map((file) => (
+              <li key={file._id}>
+                {file.filename} ({file.language})
               </li>
             ))}
           </ul>
@@ -80,31 +62,36 @@ export default function EditorPage() {
       </div>
 
       {/* Editor */}
-      <div style={{ flex: 1, padding: "20px" }}>
-        <h2>📝 Code Editor</h2>
-
-        {/* Language Selector */}
-        <label>
-          Select Language:{" "}
-          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="javascript">JavaScript</option>
-            <option value="python">Python</option>
-            <option value="cpp">C++</option>
-            <option value="java">Java</option>
-          </select>
-        </label>
-
-        {/* Code Area */}
+      <div style={{ flex: 1, padding: "10px" }}>
+        <h3>✍️ Code Editor</h3>
+        <input
+          type="text"
+          placeholder="Enter filename"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+        />
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="javascript">JavaScript</option>
+          <option value="java">Java</option>
+          <option value="python">Python</option>
+          <option value="cpp">C++</option>
+        </select>
+        <br />
         <textarea
+          rows="20"
+          cols="80"
           value={code}
           onChange={(e) => setCode(e.target.value)}
-          style={{ width: "100%", height: "300px", marginTop: "10px" }}
+          placeholder="Write your code here..."
         />
-
-        {/* Buttons */}
         <br />
-        <button onClick={saveFile} style={{ marginTop: "10px" }}>💾 Save File</button>
+        <button onClick={saveFile}>💾 Save</button>
       </div>
     </div>
   );
-}
+};
+
+export default EditorPage;
