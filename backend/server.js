@@ -1,65 +1,29 @@
-import express from "express";
-import cors from "cors";
-import fs from "fs";
-import path from "path";
+// backend/server.js
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-const PORT = 5000;
-
 app.use(cors());
 app.use(express.json());
 
-const FILES_DIR = path.join(process.cwd(), "saved_files");
+// MongoDB connection: set MONGO_URI in backend/.env or fallback to local
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/voice_code_editor';
+mongoose
+  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch((err) => console.error('❌ MongoDB connection error:', err.message));
 
-// Ensure saved_files folder exists
-if (!fs.existsSync(FILES_DIR)) {
-  fs.mkdirSync(FILES_DIR);
-}
+// Routes
+const codeRoutes = require('./routes/codeRoutes');
+app.use('/api/code', codeRoutes);
 
-// Save file API
-app.post("/save", (req, res) => {
-  const { filename, content } = req.body;
+// Optional health route
+app.get('/', (req, res) => res.send('Backend running'));
 
-  if (!filename || !content) {
-    return res.status(400).json({ success: false, message: "Filename and content required" });
-  }
-
-  const filePath = path.join(FILES_DIR, filename);
-
-  fs.writeFile(filePath, content, (err) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: "Error saving file" });
-    }
-    res.json({ success: true, message: "File saved successfully" });
-  });
-});
-
-// Get all saved files
-app.get("/files", (req, res) => {
-  fs.readdir(FILES_DIR, (err, files) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: "Error reading files" });
-    }
-    res.json({ success: true, files });
-  });
-});
-
-// Get file content by name
-app.get("/files/:name", (req, res) => {
-  const filePath = path.join(FILES_DIR, req.params.name);
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ success: false, message: "File not found" });
-  }
-
-  fs.readFile(filePath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: "Error reading file" });
-    }
-    res.json({ success: true, content: data });
-  });
-});
-
+// Start server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Backend listening on http://localhost:${PORT}`);
 });

@@ -19,6 +19,11 @@
     "mongoose": "^8.18.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "express": "^4.x",
+    "mongoose": "^6.x",
+    "cors": "^2.x",
+    "dotenv": "^16.x",
+    "nodemon": "^3.1.10",
+    "type": "module"
   }
 }
