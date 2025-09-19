@@ -1,42 +1,41 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function LandingPage() {
+const LandingPage = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-black via-blue-900 to-black text-white flex flex-col">
       {/* Navbar */}
-      <header className="flex justify-between items-center px-8 py-4 bg-gradient-to-r from-black via-blue-900 to-black shadow-lg">
-        <h1 className="text-2xl font-bold text-blue-400">CodeCollab</h1>
-        <nav>
-          <ul className="flex gap-6 text-gray-300">
-            <li className="hover:text-blue-400 cursor-pointer">Home</li>
-            <li className="hover:text-blue-400 cursor-pointer">About</li>
-            <li className="hover:text-blue-400 cursor-pointer">Contact</li>
-          </ul>
-        </nav>
-      </header>
+      <nav className="flex justify-between items-center px-8 py-4 bg-black bg-opacity-80 shadow-md">
+        <h1 className="text-2xl font-bold text-blue-400">SpeakToCode</h1>
+        <button
+          onClick={() => navigate("/editor")}
+          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow"
+        >
+          Open Editor
+        </button>
+      </nav>
 
       {/* Hero Section */}
-      <main className="flex flex-col items-center justify-center flex-1 px-6 text-center">
-        <h2 className="text-4xl md:text-6xl font-extrabold text-blue-400 mb-6">
-          Real-Time Code Collaboration
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
+        <h2 className="text-5xl font-extrabold mb-6">
+          Code Smarter with <span className="text-blue-400">Your Voice</span>
         </h2>
-        <p className="text-lg md:text-xl text-gray-400 max-w-2xl mb-10">
-          Write, edit and share code seamlessly with your team — all inside a
-          modern editor that feels just like VS Code.
+        <p className="text-lg text-gray-300 max-w-2xl mb-8">
+          SpeakToCode lets you create, edit, and manage code files effortlessly
+          with voice commands and a modern editor interface. Save, update, and
+          delete your work with ease.
         </p>
-        <Link
-          to="/editor"
-          className="px-6 py-3 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold shadow-lg transition-all"
+        <button
+          onClick={() => navigate("/editor")}
+          className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-3 rounded-lg text-lg shadow-lg"
         >
-          Start Coding
-        </Link>
-      </main>
-
-      {/* Footer */}
-      <footer className="text-center py-4 bg-black border-t border-blue-900 text-gray-500">
-        © {new Date().getFullYear()} CodeCollab. All rights reserved.
-      </footer>
+          🚀 Get Started
+        </button>
+      </div>
     </div>
   );
-}
+};
+
+export default LandingPage;
