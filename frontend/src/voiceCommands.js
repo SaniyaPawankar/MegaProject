@@ -1,52 +1,39 @@
-// voiceCommands.js
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 
-/**
- * This hook sets up speech recognition and handles voice commands.
- * @param {Function} onCommand - Callback function to execute when a command is detected.
- */
 export default function useVoiceCommands(onCommand) {
+  const startListening = () =>
+    SpeechRecognition.startListening({ continuous: true, language: "en-US" });
+
+  const stopListening = () => SpeechRecognition.stopListening();
+
   const commands = [
     {
-      command: "write *",
+      command: "*",
       callback: (text) => {
-        onCommand(`// Voice Input\n${text}`);
+        if (text) onCommand(text);
       },
     },
     {
-      command: "clear editor",
-      callback: () => {
-        onCommand("");
-      },
+      command: "create for loop",
+      callback: () =>
+        onCommand("for (let i = 0; i < 10; i++) {\n  console.log(i);\n}\n"),
     },
     {
-      command: "run code",
-      callback: () => {
-        onCommand("// Running code...");
-      },
+      command: "create if condition",
+      callback: () =>
+        onCommand("if (condition) {\n  // your code\n}\n"),
     },
+    { command: "clear editor", callback: () => onCommand("") },
+    { command: "go to next line", callback: () => onCommand("\n") },
+    { command: "run code", callback: () => onCommand("// Running code...\n") },
   ];
 
-  const { transcript, resetTranscript, listening, browserSupportsSpeechRecognition } =
+  const { transcript, listening, browserSupportsSpeechRecognition } =
     useSpeechRecognition({ commands });
 
-  const startListening = () => {
-    SpeechRecognition.startListening({ continuous: true, language: "en-US" });
-  };
-
-  const stopListening = () => {
-    SpeechRecognition.stopListening();
-  };
-
   if (!browserSupportsSpeechRecognition) {
-    console.warn("Your browser does not support speech recognition.");
+    console.warn("Browser does not support speech recognition.");
   }
 
-  return {
-    transcript,
-    resetTranscript,
-    listening,
-    startListening,
-    stopListening,
-  };
+  return { transcript, listening, startListening, stopListening };
 }
